@@ -39,3 +39,53 @@ See `example.svg` for an example.
 It then opens up a headless browser using `puppeteer` and loads the SVG into it.
 Then it repeatedly changes the value of `--start` and takes screenshots.
 Those screenshots are converted to an mp4 file using `ffmpeg`.
+
+## Prompt for converting an SVG to use CSS animations
+
+If you are working with a newer SVG that uses native animation elements, you will need to convert it before using this script.  AI assistants like Claude are pretty good at doing this for you. 
+
+Here is an example of a prompt that I've used to accomplish this.  (In this case I was using Claude in a development environment so it also ran the script for me in the integrated terminal.)
+
+```markdown
+
+I want to use this script index.js to turn this svg into a mp4 file: {{ source svg file path }}
+It runs correctly with example.svg, but I noticed that the example.svg has different animation properties than my svg.
+
+The main differences between our svg and example.svg are:
+
+1. Animation Control Properties:
+    - example.svg uses CSS variables `--start` and `--play-state` which are required by the converter
+    - Ours uses SVG native animations (`<animate>` and `<animateTransform>`) without these control properties
+2. Animation Method:
+    - example.svg uses CSS animations with @keyframes
+    - Ours uses SVG's native animation elements
+
+To make this work, we need to 
+
+1. Modify our svg to add the required control properties:
+    
+    ```css
+    svg {
+      --start: 0s;
+      --play-state: running;
+    }
+    ```
+    
+2. Convert the SVG animations to use CSS animations with the proper control variables. For example:
+    
+    ```css
+    .rotating-triangle {
+      animation: rotate 20s linear infinite;
+      animation-play-state: var(--play-state);
+      animation-delay: calc(0s - var(--start));
+    }
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    ```
+    
+3. Run the conversion with appropriate duration and framerate parameters based on our longest animation.
+
+You can also check out this readme for more information: readme.md
+```
